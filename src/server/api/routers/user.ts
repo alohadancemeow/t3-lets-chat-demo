@@ -2,8 +2,41 @@ import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 import { CreateUsernameResponse } from "../../../types/myTypes";
+import { TRPCError } from "@trpc/server";
+import { User } from "@prisma/client";
 
 export const userRouter = createTRPCRouter({
+  getAllUsers: protectedProcedure.query(
+    async ({ ctx }): Promise<Array<User>> => {
+      const { prisma, session } = ctx;
+
+      if (!session.user) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Not authorized",
+        });
+      }
+
+      const { username: myUsername } = session.user;
+
+      // Search username exept me
+      try {
+        const users = await prisma.user.findMany({
+          where: {
+            username: {
+              not: myUsername,
+              mode: "insensitive",
+            },
+          },
+        });
+
+        return users;
+      } catch (error: any) {
+        console.log("search username error", error);
+        throw new TRPCError(error?.message);
+      }
+    }
+  ),
   createUsername: protectedProcedure
     .input(
       z.object({

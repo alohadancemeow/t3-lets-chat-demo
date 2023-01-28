@@ -3,10 +3,11 @@ import { getSession, useSession } from "next-auth/react";
 
 import Chat from "../components/Chat";
 import Auth from "../components/Auth";
+import { Container } from "@nextui-org/react";
 
 const Home: NextPage = () => {
   const { data: session, status } = useSession();
-  console.log("HERE IS SESSION", session);
+  // console.log("HERE IS SESSION", session);
 
   /**
    * Reload session to obtain new username
@@ -18,13 +19,21 @@ const Home: NextPage = () => {
 
   return (
     <>
-      <div>
+      <Container
+        css={{
+          // border: '1px solid blue',
+          maxWidth: "100%",
+          minHeight: '100vh',
+          margin: '0',
+          padding: '0'
+        }}
+      >
         {session?.user?.username ? (
           <Chat session={session} />
         ) : (
           <Auth session={session} reloadSession={reloadSession} />
         )}
-      </div>
+      </Container>
     </>
   );
 };
