@@ -42,16 +42,16 @@ model Session {
 }
 
 model User {
-    id                      String                    @id @default(auto()) @map("_id") @db.ObjectId
-    name                    String?
-    username                String?                   @unique
-    email                   String?                   @unique
-    emailVerified           DateTime?
-    image                   String?
-    accounts                Account[]
-    sessions                Session[]
-    ConversationParticipant ConversationParticipant[]
-    Message                 Message[]
+    id            String                    @id @default(auto()) @map("_id") @db.ObjectId
+    name          String?
+    username      String?                   @unique
+    email         String?                   @unique
+    emailVerified DateTime?
+    image         String?
+    accounts      Account[]
+    sessions      Session[]
+    conversations ConversationParticipant[]
+    messages      Message[]
 }
 
 model VerificationToken {
@@ -68,10 +68,9 @@ model Conversation {
     createdAt       DateTime                  @default(now())
     updatedAt       DateTime                  @updatedAt
     participants    ConversationParticipant[]
-    messages        Message[]                 @relation("conversationMessages")
+    messages        Message[]
     latestMessageId String?                   @unique @db.ObjectId
     latestMessage   Message?                  @relation(name: "latestConversationMessage", fields: [latestMessageId], references: [id], onUpdate: NoAction, onDelete: NoAction)
-    Message         Message[]
 }
 
 model ConversationParticipant {
@@ -88,12 +87,11 @@ model ConversationParticipant {
 model Message {
     id             String        @id @default(auto()) @map("_id") @db.ObjectId
     conversationId String        @db.ObjectId
-    conversation   Conversation  @relation(name: "conversationMessages", fields: [conversationId], references: [id])
+    conversation   Conversation  @relation(fields: [conversationId], references: [id])
     senderId       String        @db.ObjectId
     sender         User          @relation(fields: [senderId], references: [id])
     body           String
     isLatestIn     Conversation? @relation(name: "latestConversationMessage")
     createdAt      DateTime      @default(now())
     updatedAt      DateTime      @updatedAt
-    Conversation   Conversation  @relation(fields: [conversationId], references: [id])
 }

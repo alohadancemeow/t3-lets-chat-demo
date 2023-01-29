@@ -8,13 +8,46 @@ import ConversationModal from "./Modal";
 import { MdLogout } from "react-icons/md";
 import { BsPatchPlusFill } from "react-icons/bs";
 import { Button, Container, Spacer, useModal } from "@nextui-org/react";
+import { Prisma } from "@prisma/client";
+
+export type ConversationPopulated = Prisma.ConversationGetPayload<{
+  include: typeof conversationPopulated;
+}>;
+
+export const conversationPopulated =
+  Prisma.validator<Prisma.ConversationInclude>()({
+    participants: {
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            image: true,
+          },
+        },
+      },
+    },
+    // latestMessage: {
+    //   include: {
+    //     sender: {
+    //       select: {
+    //         id: true,
+    //         username: true,
+    //       },
+    //     },
+    //   },
+    // },
+  });
 
 type Props = {
   session: Session;
+  conversations: Array<ConversationPopulated>;
 };
 
-const ConversationList = ({ session }: Props) => {
+const ConversationList = ({ session, conversations }: Props) => {
   const { bindings, setVisible } = useModal();
+
+  const { id: userId } = session.user!!;
 
   return (
     <Container
@@ -47,7 +80,29 @@ const ConversationList = ({ session }: Props) => {
         />
       </div>
 
-      <ConversationItem />
+      {conversations.map((conversation) => {
+        const participant = conversation.participants.find(
+          (p) => p.user.id === userId
+        );
+
+        return (
+          <ConversationItem
+            key={conversation.id}
+            userId={userId}
+            conversation={conversation}
+
+            // onClick={() =>
+            //   onViewConversation(
+            //     conversation.id,
+            //     participant?.hasSeenLatestMessage
+            //   )
+            // }
+            // hasSeenLatestMessage={participant?.hasSeenLatestMessage}
+            // isSelected={conversation.id === router.query.conversationId}
+            // onDeleteConversation={onDeleteConversation}
+          />
+        );
+      })}
 
       <div>
         <Spacer y={1} />
