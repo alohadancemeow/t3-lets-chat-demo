@@ -34,18 +34,15 @@ const ConversationModal = ({ session, bindings, setVisible }: Props) => {
   // call create conversation mutation
   const {
     data: conversationData,
-    error: conversationError,
     isLoading: conversationIsLoading,
     mutateAsync,
-    mutate,
   } = trpc.conversation.createConversation.useMutation({
     onMutate: () => {
       utils.conversation.conversations.cancel();
-      const optimiscUpdate = utils.conversation.conversations.getData();
-      console.log("onMutate", optimiscUpdate);
+      const optimisticUpdate = utils.conversation.conversations.getData();
 
-      if (optimiscUpdate) {
-        utils.conversation.conversations.setData(undefined, optimiscUpdate);
+      if (optimisticUpdate) {
+        utils.conversation.conversations.setData(undefined, optimisticUpdate);
       }
     },
     onError: (error) => {
@@ -74,7 +71,6 @@ const ConversationModal = ({ session, bindings, setVisible }: Props) => {
   const removeParticipant = (userId: string) => {
     setParticipants((prev) => prev.filter((p) => p.id !== userId));
   };
-  // console.log("participants", participants);
 
   // Handle create conversation
   const onCreateConversation = async () => {

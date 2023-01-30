@@ -91,7 +91,57 @@ export const conversationRouter = createTRPCRouter({
         throw new TRPCError(error?.message);
       }
     }),
+
   // markConversationAsRead
+  markConversationAsRead: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        conversationId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { prisma, session } = ctx;
+      const { userId, conversationId } = input;
+
+      if (!session.user) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Not authorized",
+        });
+      }
+
+      try {
+        const participant = await prisma.conversationParticipant.findFirst({
+          where: {
+            userId,
+            conversationId,
+          },
+        });
+
+        if (!participant) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Participant entity not found",
+          });
+        }
+
+        await prisma.conversationParticipant.update({
+          where: {
+            id: participant.id,
+          },
+          data: {
+            hasSeenLatestMessage: true,
+          },
+        });
+
+        return true;
+      } catch (error: any) {
+        console.log("markConversationAsRead err", error);
+        throw new TRPCError(error?.message);
+      }
+    }),
+
   // deleteConversation
   // Subscription
 });

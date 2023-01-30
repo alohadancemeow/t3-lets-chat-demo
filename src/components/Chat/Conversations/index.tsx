@@ -12,6 +12,7 @@ type Props = {
 
 const CovnersationWrapper = ({ session }: Props) => {
   const router = useRouter();
+  const utils = trpc.useContext();
 
   // Call conversations query
   const {
@@ -21,6 +22,26 @@ const CovnersationWrapper = ({ session }: Props) => {
   } = trpc.conversation.conversations.useQuery();
   // console.log("conversation data", conversationData);
 
+  // Call markConversatioAsRead mutation
+  const { mutateAsync: markConversationAsReadMutate } =
+    trpc.conversation.markConversationAsRead.useMutation({
+      onMutate: () => {
+        utils.conversation.conversations.cancel();
+        const optimisticUpdate = utils.conversation.conversations.getData();
+        console.log("onMutate", optimisticUpdate);
+
+        if (optimisticUpdate) {
+          utils.conversation.conversations.setData(undefined, optimisticUpdate);
+        }
+      },
+      onSuccess: (data) => {
+        console.log("onSuccess markConversatioAsRead", data);
+      },
+      onSettled: () => {
+        utils.conversation.conversations.invalidate();
+      },
+    });
+
   // Handle view conversation
   const onViewConversation = async (
     conversationId: string,
@@ -28,10 +49,17 @@ const CovnersationWrapper = ({ session }: Props) => {
   ) => {
     // 1. push the conversationId to the router query params
     router.push({ query: { conversationId } });
+    
     // 2. mark the conversation as read
     if (hasSeenLastestMessage) return;
-
-    // markConversationAsRead mutation
+    try {
+      await markConversationAsReadMutate({
+        userId: session.user?.id!!,
+        conversationId,
+      });
+    } catch (error: any) {
+      console.log("onView-markAsRead", error);
+    }
   };
 
   return (
