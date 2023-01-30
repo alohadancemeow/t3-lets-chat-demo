@@ -7,7 +7,7 @@ import ConversationModal from "./Modal";
 
 import { MdLogout } from "react-icons/md";
 import { BsPatchPlusFill } from "react-icons/bs";
-import { Button, Container, Spacer, useModal } from "@nextui-org/react";
+import { Button, Container, Spacer, Text, useModal } from "@nextui-org/react";
 import { Prisma } from "@prisma/client";
 
 export type ConversationPopulated = Prisma.ConversationGetPayload<{
@@ -27,16 +27,16 @@ export const conversationPopulated =
         },
       },
     },
-    // latestMessage: {
-    //   include: {
-    //     sender: {
-    //       select: {
-    //         id: true,
-    //         username: true,
-    //       },
-    //     },
-    //   },
-    // },
+    latestMessage: {
+      include: {
+        sender: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+      },
+    },
   });
 
 type Props = {
@@ -52,12 +52,12 @@ const ConversationList = ({ session, conversations }: Props) => {
   return (
     <Container
       css={{
-        border: "1px solid orange",
+        // border: "1px solid orange",
         height: "100%",
         margin: "0px",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "space-between",
+        justifyContent: "space-around",
         alignItems: "center",
       }}
     >
@@ -80,29 +80,82 @@ const ConversationList = ({ session, conversations }: Props) => {
         />
       </div>
 
-      {conversations.map((conversation) => {
-        const participant = conversation.participants.find(
-          (p) => p.user.id === userId
-        );
+      <div
+        style={{
+          // border: "1px solid red",
+          width: "100%",
+          height: "70%",
+          gap: "8px",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        {conversations.length !== 0 ? (
+          conversations.map((conversation) => {
+            const participant = conversation.participants.find(
+              (p) => p.user.id === userId
+            );
 
-        return (
-          <ConversationItem
-            key={conversation.id}
-            userId={userId}
-            conversation={conversation}
+            return (
+              <ConversationItem
+                key={conversation.id}
+                userId={userId}
+                conversation={conversation}
 
-            // onClick={() =>
-            //   onViewConversation(
-            //     conversation.id,
-            //     participant?.hasSeenLatestMessage
-            //   )
-            // }
-            // hasSeenLatestMessage={participant?.hasSeenLatestMessage}
-            // isSelected={conversation.id === router.query.conversationId}
-            // onDeleteConversation={onDeleteConversation}
-          />
-        );
-      })}
+                // onClick={() =>
+                //   onViewConversation(
+                //     conversation.id,
+                //     participant?.hasSeenLatestMessage
+                //   )
+                // }
+                // hasSeenLatestMessage={participant?.hasSeenLatestMessage}
+                // isSelected={conversation.id === router.query.conversationId}
+                // onDeleteConversation={onDeleteConversation}
+              />
+            );
+          })
+        ) : (
+          <div
+            style={{
+              display: "grid",
+              margin: "auto",
+            }}
+          >
+            <>
+              <Text
+                h1
+                size={60}
+                css={{
+                  textGradient: "45deg, $blue600 -20%, $pink600 50%",
+                }}
+                weight="bold"
+              >
+                Speak 📢
+              </Text>
+              <Text
+                h1
+                size={60}
+                css={{
+                  textGradient: "45deg, $purple600 -20%, $pink600 100%",
+                }}
+                weight="bold"
+              >
+                It
+              </Text>
+              <Text
+                h1
+                size={60}
+                css={{
+                  textGradient: "45deg, $yellow600 -20%, $red600 100%",
+                }}
+                weight="bold"
+              >
+                Out! 🎉
+              </Text>
+            </>
+          </div>
+        )}
+      </div>
 
       <div>
         <Spacer y={1} />

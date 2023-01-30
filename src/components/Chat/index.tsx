@@ -10,11 +10,11 @@ type Props = {
 
 const Chat = ({ session }: Props) => {
   return (
-    <Grid.Container  justify="center">
-      <Grid xs={6}>
+    <Grid.Container justify="center">
+      <Grid xs={6} sm={4} md={3}>
         <CovnersationWrapper session={session} />
       </Grid>
-      <Grid xs={6}>
+      <Grid xs={6} sm={8} md={9}>
         <FeedWrapper session={session} />
       </Grid>
     </Grid.Container>
