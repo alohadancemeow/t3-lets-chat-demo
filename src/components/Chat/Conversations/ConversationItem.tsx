@@ -1,24 +1,28 @@
 import React from "react";
 import { ConversationPopulated } from "./ConversationList";
-import {
-  Avatar,
-  Card,
-  Grid,
-  User as Profile,
-  Tooltip,
-  Text,
-} from "@nextui-org/react";
+import { Avatar, Card, Grid, Tooltip, Text } from "@nextui-org/react";
 
 type Props = {
   userId: string;
   conversation: ConversationPopulated;
+  onViewConversation: (
+    conversationId: string,
+    hasSeenLastestMessage: boolean | undefined
+  ) => void;
+  isSelected: boolean;
+  hasSeenLatestMessage: boolean | undefined;
+
   // onClick: () => void;
-  // isSelected: boolean;
-  // hasSeenLatestMessage: boolean | undefined;
   // onDeleteConversation: (conversationId: string) => void;
 };
 
-const ConversationItem = ({ userId, conversation }: Props) => {
+const ConversationItem = ({
+  userId,
+  conversation,
+  onViewConversation,
+  isSelected,
+  hasSeenLatestMessage,
+}: Props) => {
   return (
     <div>
       <Card
@@ -27,9 +31,15 @@ const ConversationItem = ({ userId, conversation }: Props) => {
         variant="shadow"
         css={{
           mw: "100%",
-          bg: "$accents1",
+          bg: `${isSelected ? "$accents5" : "$accents1"}`,
         }}
-        // onPress={() => addParticipant(user)}
+        onPress={() =>
+          onViewConversation(
+            conversation.id,
+            conversation.participants.find((p) => p.user.id === userId)
+              ?.hasSeenLatestMessage
+          )
+        }
       >
         <Card.Body
           css={{
@@ -60,7 +70,9 @@ const ConversationItem = ({ userId, conversation }: Props) => {
                         pointer
                         src={`${participant.user.image}`}
                         bordered
-                        color="default"
+                        color={`${
+                          hasSeenLatestMessage ? "default" : "primary"
+                        }`}
                         stacked
                       />
                     </Tooltip>

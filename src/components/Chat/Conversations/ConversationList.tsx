@@ -9,44 +9,25 @@ import { MdLogout } from "react-icons/md";
 import { BsPatchPlusFill } from "react-icons/bs";
 import { Button, Container, Spacer, Text, useModal } from "@nextui-org/react";
 import { Prisma } from "@prisma/client";
-
-export type ConversationPopulated = Prisma.ConversationGetPayload<{
-  include: typeof conversationPopulated;
-}>;
-
-export const conversationPopulated =
-  Prisma.validator<Prisma.ConversationInclude>()({
-    participants: {
-      include: {
-        user: {
-          select: {
-            id: true,
-            username: true,
-            image: true,
-          },
-        },
-      },
-    },
-    latestMessage: {
-      include: {
-        sender: {
-          select: {
-            id: true,
-            username: true,
-          },
-        },
-      },
-    },
-  });
+import { useRouter } from "next/router";
 
 type Props = {
   session: Session;
   conversations: Array<ConversationPopulated>;
+  onViewConversation: (
+    conversationId: string,
+    hasSeenLastestMessage: boolean | undefined
+  ) => void;
 };
 
-const ConversationList = ({ session, conversations }: Props) => {
+const ConversationList = ({
+  session,
+  conversations,
+  onViewConversation,
+}: Props) => {
   const { bindings, setVisible } = useModal();
 
+  const router = useRouter();
   const { id: userId } = session.user!!;
 
   return (
@@ -101,15 +82,10 @@ const ConversationList = ({ session, conversations }: Props) => {
                 key={conversation.id}
                 userId={userId}
                 conversation={conversation}
+                onViewConversation={onViewConversation}
+                isSelected={conversation.id === router.query.conversationId}
+                hasSeenLatestMessage={participant?.hasSeenLatestMessage}
 
-                // onClick={() =>
-                //   onViewConversation(
-                //     conversation.id,
-                //     participant?.hasSeenLatestMessage
-                //   )
-                // }
-                // hasSeenLatestMessage={participant?.hasSeenLatestMessage}
-                // isSelected={conversation.id === router.query.conversationId}
                 // onDeleteConversation={onDeleteConversation}
               />
             );
@@ -175,3 +151,33 @@ const ConversationList = ({ session, conversations }: Props) => {
 };
 
 export default ConversationList;
+
+// types
+export type ConversationPopulated = Prisma.ConversationGetPayload<{
+  include: typeof conversationPopulated;
+}>;
+
+export const conversationPopulated =
+  Prisma.validator<Prisma.ConversationInclude>()({
+    participants: {
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            image: true,
+          },
+        },
+      },
+    },
+    latestMessage: {
+      include: {
+        sender: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+      },
+    },
+  });
