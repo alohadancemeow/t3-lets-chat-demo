@@ -1,9 +1,14 @@
 import { z } from "zod";
+import { observable } from "@trpc/server/observable";
+import { EventEmitter } from "events";
 
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 import { CreateUsernameResponse } from "../../../types/myTypes";
 import { TRPCError } from "@trpc/server";
-import { Prisma, User } from "@prisma/client";
+import { Conversation, Prisma, User } from "@prisma/client";
+
+// create a global event emitter
+const eventEmitter = new EventEmitter();
 
 // Note: don't forget its return type
 export const conversationRouter = createTRPCRouter({
@@ -85,6 +90,9 @@ export const conversationRouter = createTRPCRouter({
           include: conversationPopulated,
         });
 
+        // subscribe
+        eventEmitter.emit("add", conversation);
+
         return { conversationId: conversation.id };
       } catch (error: any) {
         console.log("create conversation err", error);
@@ -143,7 +151,20 @@ export const conversationRouter = createTRPCRouter({
     }),
 
   // deleteConversation
-  // Subscription
+  // Subscriptions
+  createConversationSubscription: protectedProcedure.subscription(() => {
+    return observable<Conversation>((emit) => {
+      const onAdd = (data: Conversation) => {
+        emit.next(data);
+      };
+
+      eventEmitter.on("add", onAdd);
+
+      return () => {
+        eventEmitter.off("add", onAdd);
+      };
+    });
+  }),
 });
 
 // include statements

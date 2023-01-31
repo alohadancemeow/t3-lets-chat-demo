@@ -32,39 +32,43 @@ const ConversationModal = ({ session, bindings, setVisible }: Props) => {
   } = trpc.user.getAllUsers.useQuery();
 
   // call create conversation mutation
-  const {
-    data: conversationData,
-    isLoading: conversationIsLoading,
-    mutateAsync,
-  } = trpc.conversation.createConversation.useMutation({
-    onMutate: () => {
-      utils.conversation.conversations.cancel();
-      const optimisticUpdate = utils.conversation.conversations.getData();
+  const { isLoading: conversationIsLoading, mutateAsync } =
+    trpc.conversation.createConversation.useMutation({
+      onMutate: () => {
+        utils.conversation.conversations.cancel();
+        const optimisticUpdate = utils.conversation.conversations.getData();
 
-      if (optimisticUpdate) {
-        utils.conversation.conversations.setData(undefined, optimisticUpdate);
-      }
-    },
-    onError: (error) => {
-      console.log("onError", error.data);
-    },
-    onSettled: () => {
-      utils.conversation.conversations.invalidate();
-    },
-    onSuccess: ({ conversationId }) => {
-      console.log("onSuccess conversationId", conversationId);
+        if (optimisticUpdate) {
+          utils.conversation.conversations.setData(undefined, optimisticUpdate);
+        }
+      },
+      onError: (error) => {
+        console.log("onError", error.data);
+      },
+      onSettled: () => {
+        utils.conversation.conversations.invalidate();
+      },
+      onSuccess: ({ conversationId }) => {
+        console.log("onSuccess conversationId", conversationId);
+
+        // Clear state and close modal on successful creation
+        setParticipants([]);
+        setUsername("");
+        setVisible(false);
+      },
+    });
+
+  trpc.conversation.createConversationSubscription.useSubscription(undefined, {
+    onData: (data) => {
+      console.log("onData", data);
     },
   });
 
-  // console.log("conversationData", conversationData);
-  // console.log("conversationError", conversationError);
-
-  //   Handle add-remove participants
+  //  Handle add-remove participants
   const addParticipant = (user: User) => {
     const isExisting = participants.some((p) => p.id === user.id);
     if (!isExisting) {
       setParticipants((prev) => [...prev, user]);
-      // setUsername("");
     }
   };
 
@@ -79,21 +83,11 @@ const ConversationModal = ({ session, bindings, setVisible }: Props) => {
       ...participants.map((p) => p.id),
     ];
 
+    // create conversation,
+    // after that push to conversation room
     try {
       const { conversationId } = await mutateAsync({ participantIds });
-      console.log("conversationId", conversationId);
-
-      if (!conversationId) {
-        throw new Error("Failed t ocreate conversation");
-      }
-
-      // Push to conversation room
       router.push({ query: { conversationId } });
-
-      // Clear state and close modal on successful creation
-      setParticipants([]);
-      setUsername("");
-      setVisible(false);
     } catch (error: any) {
       console.log("onCreateConversation err", error);
     }
@@ -152,14 +146,6 @@ const ConversationModal = ({ session, bindings, setVisible }: Props) => {
             />
           )}
         </Modal.Body>
-        {/* <Modal.Footer>
-          <Button auto flat color="error" onPress={() => setVisible(false)}>
-            Close
-          </Button>
-          <Button auto onPress={() => setVisible(false)}>
-            Agree
-          </Button>
-        </Modal.Footer> */}
       </Modal>
     </div>
   );
