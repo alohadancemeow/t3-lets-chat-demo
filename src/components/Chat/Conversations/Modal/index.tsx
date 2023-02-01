@@ -25,44 +25,11 @@ const ConversationModal = ({ session, bindings, setVisible }: Props) => {
   const utils = trpc.useContext();
 
   // get all users
-  const {
-    data: userData,
-    error: userError,
-    isLoading: userIsLoading,
-  } = trpc.user.getAllUsers.useQuery();
+  const { data: userData } = trpc.user.getAllUsers.useQuery();
 
   // call create conversation mutation
   const { isLoading: conversationIsLoading, mutateAsync } =
-    trpc.conversation.createConversation.useMutation({
-      onMutate: () => {
-        utils.conversation.conversations.cancel();
-        const optimisticUpdate = utils.conversation.conversations.getData();
-
-        if (optimisticUpdate) {
-          utils.conversation.conversations.setData(undefined, optimisticUpdate);
-        }
-      },
-      onError: (error) => {
-        console.log("onError", error.data);
-      },
-      onSettled: () => {
-        utils.conversation.conversations.invalidate();
-      },
-      onSuccess: ({ conversationId }) => {
-        console.log("onSuccess conversationId", conversationId);
-
-        // Clear state and close modal on successful creation
-        setParticipants([]);
-        setUsername("");
-        setVisible(false);
-      },
-    });
-
-  trpc.conversation.createConversationSubscription.useSubscription(undefined, {
-    onData: (data) => {
-      console.log("onData", data);
-    },
-  });
+    trpc.conversation.createConversation.useMutation();
 
   //  Handle add-remove participants
   const addParticipant = (user: User) => {
@@ -84,14 +51,33 @@ const ConversationModal = ({ session, bindings, setVisible }: Props) => {
     ];
 
     // create conversation,
-    // after that push to conversation room
+    // after that push to conversation room,
+    // clear all states
     try {
       const { conversationId } = await mutateAsync({ participantIds });
       router.push({ query: { conversationId } });
+
+      // Clear state and close modal on successful creation
+      setParticipants([]);
+      setUsername("");
+      setVisible(false);
     } catch (error: any) {
       console.log("onCreateConversation err", error);
     }
   };
+
+  // subscribe to new conversation and add
+  trpc.conversation.createConversationSubscription.useSubscription(undefined, {
+    onData: (data) => {
+      console.log("onData", data);
+
+      // we might have missed a conversation - invalidate cache
+      utils.conversation.conversations.invalidate();
+    },
+    onError: (error) => {
+      console.error("Subscription error:", error);
+    },
+  });
 
   return (
     <div>

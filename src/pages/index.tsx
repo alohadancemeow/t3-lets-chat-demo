@@ -7,7 +7,7 @@ import { Container } from "@nextui-org/react";
 
 const Home: NextPage = () => {
   const { data: session, status } = useSession();
-  // console.log("HERE IS SESSION", session);
+  console.log("HERE IS SESSION", session);
 
   /**
    * Reload session to obtain new username
@@ -38,14 +38,14 @@ const Home: NextPage = () => {
   );
 };
 
-export async function getServerSideProps(context: NextPageContext) {
-  const session = await getSession(context);
+// export async function getServerSideProps(context: NextPageContext) {
+//   const session = await getSession(context);
 
-  return {
-    props: {
-      session,
-    },
-  };
-}
+//   return {
+//     props: {
+//       session,
+//     },
+//   };
+// }
 
 export default Home;

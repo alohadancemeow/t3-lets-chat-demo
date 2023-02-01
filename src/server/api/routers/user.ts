@@ -10,22 +10,14 @@ export const userRouter = createTRPCRouter({
     async ({ ctx }): Promise<Array<User>> => {
       const { prisma, session } = ctx;
 
-      if (!session.user) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Not authorized",
-        });
-      }
-
-      const { username: myUsername } = session.user;
+      const { id: myId } = session.user;
 
       // Search username exept me
       try {
         const users = await prisma.user.findMany({
           where: {
-            username: {
-              not: myUsername,
-              mode: "insensitive",
+            id: {
+              not: myId,
             },
           },
         });
@@ -46,10 +38,6 @@ export const userRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }): Promise<CreateUsernameResponse> => {
       const { prisma, session } = ctx;
       const { username } = input;
-
-      if (!session.user) {
-        return { error: "Not authorized" };
-      }
 
       const { id: userId } = session.user;
 
@@ -80,7 +68,8 @@ export const userRouter = createTRPCRouter({
         return { success: true };
       } catch (error: any) {
         console.log("createUsername error", error);
-        return { error: error?.message };
+        // return { error: error?.message };
+        throw new TRPCError(error?.message);
       }
     }),
 });

@@ -11,6 +11,8 @@ import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
 import superjson from "superjson";
 
 import { type AppRouter } from "../server/api/root";
+import { NextPageContext } from "next";
+import { wsLink, createWSClient } from "@trpc/client/links/wsLink";
 
 const getBaseUrl = () => {
   if (typeof window !== "undefined") return ""; // browser should use relative url
@@ -18,11 +20,37 @@ const getBaseUrl = () => {
   return `http://localhost:${process.env.PORT ?? 3000}`; // dev SSR should use localhost
 };
 
+const url = `${getBaseUrl}/api/trpc`;
+
+function getEndingLink(ctx: NextPageContext | undefined) {
+  if (typeof window === "undefined") {
+    return httpBatchLink({
+      url,
+      headers() {
+        if (ctx?.req) {
+          // on ssr, forward client's headers to the server
+          return {
+            ...ctx.req.headers,
+            "x-ssr": "1",
+          };
+        }
+        return {};
+      },
+    });
+  }
+  const client = createWSClient({
+    url: process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:3001",
+  });
+  return wsLink<AppRouter>({
+    client,
+  });
+}
+
 /**
  * A set of typesafe react-query hooks for your tRPC API
  */
 export const api = createTRPCNext<AppRouter>({
-  config() {
+  config({ ctx }) {
     return {
       /**
        * Transformer used for data de-serialization from the server
@@ -40,17 +68,19 @@ export const api = createTRPCNext<AppRouter>({
             process.env.NODE_ENV === "development" ||
             (opts.direction === "down" && opts.result instanceof Error),
         }),
-        httpBatchLink({
-          url: `${getBaseUrl()}/api/trpc`,
-        }),
+        // httpBatchLink({
+        //   url: `${getBaseUrl()}/api/trpc`,
+        // }),
+        getEndingLink(ctx),
       ],
+      queryClientConfig: { defaultOptions: { queries: { staleTime: 60 } } },
     };
   },
   /**
    * Whether tRPC should await queries when server rendering pages
    * @see https://trpc.io/docs/nextjs#ssr-boolean-default-false
    */
-  ssr: false,
+  ssr: true,
 });
 
 /**

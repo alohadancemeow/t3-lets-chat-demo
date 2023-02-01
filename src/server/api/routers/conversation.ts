@@ -8,19 +8,12 @@ import { TRPCError } from "@trpc/server";
 import { Conversation, Prisma, User } from "@prisma/client";
 
 // create a global event emitter
-const eventEmitter = new EventEmitter();
+const ee = new EventEmitter();
 
 // Note: don't forget its return type
 export const conversationRouter = createTRPCRouter({
   conversations: protectedProcedure.query(async ({ ctx }) => {
     const { prisma, session } = ctx;
-
-    if (!session.user) {
-      throw new TRPCError({
-        code: "UNAUTHORIZED",
-        message: "Not authorized",
-      });
-    }
 
     const { id } = session.user;
 
@@ -65,13 +58,6 @@ export const conversationRouter = createTRPCRouter({
       const { prisma, session } = ctx;
       const { participantIds } = input;
 
-      if (!session.user) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Not authorized",
-        });
-      }
-
       const { id: userId } = session.user;
 
       // // Create conversation entity
@@ -91,7 +77,7 @@ export const conversationRouter = createTRPCRouter({
         });
 
         // subscribe
-        eventEmitter.emit("add", conversation);
+        ee.emit("conversationCreated", conversation);
 
         return { conversationId: conversation.id };
       } catch (error: any) {
@@ -111,13 +97,6 @@ export const conversationRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { prisma, session } = ctx;
       const { userId, conversationId } = input;
-
-      if (!session.user) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Not authorized",
-        });
-      }
 
       try {
         const participant = await prisma.conversationParticipant.findFirst({
@@ -152,16 +131,12 @@ export const conversationRouter = createTRPCRouter({
 
   // deleteConversation
   // Subscriptions
-  createConversationSubscription: protectedProcedure.subscription(() => {
+  createConversationSubscription: publicProcedure.subscription(() => {
     return observable<Conversation>((emit) => {
-      const onAdd = (data: Conversation) => {
-        emit.next(data);
-      };
-
-      eventEmitter.on("add", onAdd);
-
+      const onAdd = (data: Conversation) => emit.next(data);
+      ee.on("conversationCreated", onAdd);
       return () => {
-        eventEmitter.off("add", onAdd);
+        ee.off("conversationCreated", onAdd);
       };
     });
   }),

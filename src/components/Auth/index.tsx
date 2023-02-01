@@ -25,28 +25,43 @@ type Props = {
 };
 
 const Auth = ({ session, reloadSession }: Props) => {
+  const utils = trpc.useContext();
+
   const [username, setUsername] = useState("");
 
-  const { mutate, data, error, isLoading } =
+  const { mutateAsync, data, error, isLoading } =
     trpc.user.createUsername.useMutation({
+      onMutate: () => {
+        utils.user.getAllUsers.cancel();
+        const optimisticUpdate = utils.user.getAllUsers.getData();
+
+        if (optimisticUpdate) {
+          utils.user.getAllUsers.setData(undefined, optimisticUpdate);
+        }
+      },
       onSuccess: (data) => {
-        // console.log("onSuccess", data);
-        reloadSession();
+        console.log("onSuccess", data);
+        // reloadSession();
       },
       onError: (error) => {
         console.log("onError", error.message);
       },
       onSettled: () => {
-        setUsername("");
+        utils.user.getAllUsers.invalidate();
       },
     });
 
   // Handle submit
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!username) return;
 
     try {
-      mutate({ username });
+      // mutate({ username });
+      const { success, error } = await mutateAsync({ username });
+      if (success) reloadSession();
+      if (error) console.log(error);
+
+      setUsername("");
     } catch (error: any) {
       console.log("handleSunmit", error?.message);
     }
