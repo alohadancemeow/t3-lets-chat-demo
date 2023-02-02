@@ -67,7 +67,7 @@ const ConversationModal = ({ session, bindings, setVisible }: Props) => {
   };
 
   // subscribe to new conversation and add
-  trpc.conversation.createConversationSubscription.useSubscription(undefined, {
+  trpc.conversation.conversationCreated.useSubscription(undefined, {
     onData: (data) => {
       console.log("onData", data);
 

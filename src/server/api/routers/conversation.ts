@@ -3,9 +3,11 @@ import { observable } from "@trpc/server/observable";
 import { EventEmitter } from "events";
 
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
-import { CreateUsernameResponse } from "../../../types/myTypes";
+import {
+  ConversationPopulated,
+  conversationPopulated,
+} from "../../../types/myTypes";
 import { TRPCError } from "@trpc/server";
-import { Conversation, Prisma, User } from "@prisma/client";
 
 // create a global event emitter
 const ee = new EventEmitter();
@@ -94,7 +96,7 @@ export const conversationRouter = createTRPCRouter({
         conversationId: z.string(),
       })
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }): Promise<boolean> => {
       const { prisma, session } = ctx;
       const { userId, conversationId } = input;
 
@@ -130,43 +132,25 @@ export const conversationRouter = createTRPCRouter({
     }),
 
   // deleteConversation
-  // Subscriptions
-  createConversationSubscription: publicProcedure.subscription(() => {
-    return observable<Conversation>((emit) => {
-      const onAdd = (data: Conversation) => emit.next(data);
+  // Subscriptions when conversation is created
+  conversationCreated: publicProcedure.subscription(() => {
+    return observable<ConversationPopulated>((emit) => {
+      const onAdd = (data: ConversationPopulated) => emit.next(data);
       ee.on("conversationCreated", onAdd);
       return () => {
         ee.off("conversationCreated", onAdd);
       };
     });
   }),
+
+  // Subscriptions when conversation is updated
+  conversationUpdated: publicProcedure.subscription(() => {
+    return observable<ConversationPopulated>((emit) => {
+      const onAdd = (data: ConversationPopulated) => emit.next(data);
+      ee.on("messageSent", onAdd);
+      return () => {
+        ee.off("messageSent", onAdd);
+      };
+    });
+  }),
 });
-
-// include statements
-export const participantPopulated =
-  Prisma.validator<Prisma.ConversationParticipantInclude>()({
-    user: {
-      select: {
-        id: true,
-        username: true,
-        image: true,
-      },
-    },
-  });
-
-export const conversationPopulated =
-  Prisma.validator<Prisma.ConversationInclude>()({
-    participants: {
-      include: participantPopulated,
-    },
-    latestMessage: {
-      include: {
-        sender: {
-          select: {
-            id: true,
-            username: true,
-          },
-        },
-      },
-    },
-  });
