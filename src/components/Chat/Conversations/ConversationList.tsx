@@ -40,6 +40,7 @@ const ConversationList = ({
         flexDirection: "column",
         justifyContent: "space-around",
         alignItems: "center",
+        bg: "$accents1",
       }}
     >
       <div>
@@ -142,7 +143,7 @@ const ConversationList = ({
           ghost
           onPress={() => signOut()}
         >
-          Goodbye 👋
+          👋 Goodbye
         </Button>
         <Spacer y={2} />
       </div>
