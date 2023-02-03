@@ -28,6 +28,7 @@ const MessageInput = ({ session, conversationId }: Props) => {
       },
       onSettled: () => {
         utils.message.messages.invalidate();
+        utils.conversation.conversations.invalidate();
       },
       onError: (error) => {
         console.log("onError", error.message);
@@ -56,10 +57,18 @@ const MessageInput = ({ session, conversationId }: Props) => {
   // subscribe message sent
   trpc.message.messageSent.useSubscription(undefined, {
     onData: (data) => {
-      console.log("onData", data);
+      // console.log("onData", data);
       utils.message.messages.invalidate();
+      utils.conversation.conversations.invalidate();
     },
   });
+
+  // subscribe conversation update
+  // trpc.conversation.conversationUpdated.useSubscription(undefined, {
+  //   onData: () => {
+  //     utils.conversation.conversations.invalidate();
+  //   },
+  // });
 
   return (
     <Grid.Container gap={4}>

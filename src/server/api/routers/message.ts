@@ -104,7 +104,7 @@ export const messageRouter = createTRPCRouter({
           include: messagePopulated,
         });
 
-        console.log('newMessage', newMessage);
+        // console.log('newMessage', newMessage);
         
 
         // Find conversatio participant

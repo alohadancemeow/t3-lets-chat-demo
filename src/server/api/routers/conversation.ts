@@ -32,6 +32,9 @@ export const conversationRouter = createTRPCRouter({
           },
         },
         include: conversationPopulated,
+        orderBy: {
+          updatedAt: 'desc'
+        }
       });
 
       // Since above query does not work
@@ -147,9 +150,9 @@ export const conversationRouter = createTRPCRouter({
   conversationUpdated: publicProcedure.subscription(() => {
     return observable<ConversationPopulated>((emit) => {
       const onAdd = (data: ConversationPopulated) => emit.next(data);
-      ee.on("messageSent", onAdd);
+      ee.on("conversationUpdated", onAdd);
       return () => {
-        ee.off("messageSent", onAdd);
+        ee.off("conversationUpdated", onAdd);
       };
     });
   }),

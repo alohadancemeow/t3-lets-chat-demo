@@ -2,6 +2,7 @@ import React from "react";
 import { Container } from "@nextui-org/react";
 import MessageItem from "./Item";
 import NoMessage from "./NoMessage";
+import ScrollableFeed from "react-scrollable-feed";
 
 import { api as trpc } from "../../../../utils/api";
 
@@ -30,13 +31,15 @@ const Content = ({ conversationId, userId }: Props) => {
 
       {data && data.length !== 0 ? (
         <>
-          {data.map((message) => (
-            <MessageItem
-              key={message.id}
-              message={message}
-              sentByMe={message.sender.id === userId}
-            />
-          ))}
+          <ScrollableFeed>
+            {data.map((message) => (
+              <MessageItem
+                key={message.id}
+                message={message}
+                sentByMe={message.sender.id === userId}
+              />
+            ))}
+          </ScrollableFeed>
         </>
       ) : (
         <NoMessage />

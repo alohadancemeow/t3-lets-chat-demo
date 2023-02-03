@@ -55,6 +55,7 @@ const ConversationItem = ({
                   justifyContent: "space-between",
                   // border: '1px solid red',
                   width: "100%",
+                  padding: "0px 5px",
                 }}
               >
                 <Avatar.Group count={12}>
@@ -62,7 +63,7 @@ const ConversationItem = ({
                     <Tooltip
                       key={participant.id}
                       rounded
-                      color="success"
+                      color="primary"
                       content={`${participant.user.username}`}
                     >
                       <Avatar
@@ -85,6 +86,8 @@ const ConversationItem = ({
                       bg: "$gray500",
                       borderRadius: "10px",
                       padding: "3px 10px",
+                      textOverflow: "ellipsis",
+                      overflow: "hidden",
                     }}
                   >
                     {conversation.latestMessage?.body}
