@@ -8,8 +8,8 @@ import ConversationModal from "./Modal";
 import { MdLogout } from "react-icons/md";
 import { BsPatchPlusFill } from "react-icons/bs";
 import { Button, Container, Spacer, Text, useModal } from "@nextui-org/react";
-import { Prisma } from "@prisma/client";
 import { useRouter } from "next/router";
+import { ConversationPopulated } from "types/myTypes";
 
 type Props = {
   session: Session;
@@ -70,6 +70,7 @@ const ConversationList = ({
           gap: "8px",
           display: "flex",
           flexDirection: "column",
+          overflowY: "auto",
         }}
       >
         {conversations.length !== 0 ? (
@@ -152,33 +153,3 @@ const ConversationList = ({
 };
 
 export default ConversationList;
-
-// types
-export type ConversationPopulated = Prisma.ConversationGetPayload<{
-  include: typeof conversationPopulated;
-}>;
-
-export const conversationPopulated =
-  Prisma.validator<Prisma.ConversationInclude>()({
-    participants: {
-      include: {
-        user: {
-          select: {
-            id: true,
-            username: true,
-            image: true,
-          },
-        },
-      },
-    },
-    latestMessage: {
-      include: {
-        sender: {
-          select: {
-            id: true,
-            username: true,
-          },
-        },
-      },
-    },
-  });

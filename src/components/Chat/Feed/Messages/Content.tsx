@@ -1,6 +1,7 @@
 import React from "react";
 import { Container } from "@nextui-org/react";
 import MessageItem from "./Item";
+import NoMessage from "./NoMessage";
 
 import { api as trpc } from "../../../../utils/api";
 
@@ -21,12 +22,8 @@ const Content = ({ conversationId, userId }: Props) => {
     <Container
       css={{
         // border: "1px solid yellow",
-        // height: "750px",
-        // margin: '10px 0'
-        overflow: 'hidden',
-        overflowY: 'scroll',
-        
-        // scrollBehavior: 'smooth'
+        height: "750px",
+        overflowY: "auto",
       }}
     >
       {isLoading && <>Loading messages...</>}
@@ -42,7 +39,7 @@ const Content = ({ conversationId, userId }: Props) => {
           ))}
         </>
       ) : (
-        <>No messages</>
+        <NoMessage />
       )}
     </Container>
   );

@@ -11,7 +11,11 @@ import {
 import { api } from "../utils/api";
 
 const globalStyles = globalCss({
-  body: { margin: 0, background: "$gray200" },
+  body: {
+    margin: 0,
+    background: "$gray200",
+    overflow: "auto",
+  },
 });
 
 const myDarkTheme = createTheme({

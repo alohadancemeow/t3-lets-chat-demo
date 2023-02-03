@@ -23,9 +23,9 @@ const Home: NextPage = () => {
         css={{
           // border: '1px solid blue',
           maxWidth: "100%",
-          minHeight: '100vh',
-          margin: '0',
-          padding: '0'
+          minHeight: "100vh",
+          margin: "0",
+          padding: "0",
         }}
       >
         {session?.user?.username ? (

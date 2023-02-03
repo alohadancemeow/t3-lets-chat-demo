@@ -1,5 +1,5 @@
 import React from "react";
-import { ConversationPopulated } from "./ConversationList";
+import { ConversationPopulated } from "../../../types/myTypes";
 import { Avatar, Card, Grid, Tooltip, Text } from "@nextui-org/react";
 
 type Props = {
@@ -78,16 +78,18 @@ const ConversationItem = ({
                     </Tooltip>
                   ))}
                 </Avatar.Group>
-                <Text
-                  css={{
-                    mw: "50%",
-                    bg: "$gray500",
-                    borderRadius: "10px",
-                    padding: "3px 10px",
-                  }}
-                >
-                  Latest message...
-                </Text>
+                {conversation && conversation.latestMessage ? (
+                  <Text
+                    css={{
+                      mw: "50%",
+                      bg: "$gray500",
+                      borderRadius: "10px",
+                      padding: "3px 10px",
+                    }}
+                  >
+                    {conversation.latestMessage?.body}
+                  </Text>
+                ) : null}
               </div>
             </Grid>
           </Grid.Container>
