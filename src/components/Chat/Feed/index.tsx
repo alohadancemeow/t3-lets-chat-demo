@@ -39,11 +39,13 @@ const FeedWrapper = ({ session }: Props) => {
           }}
         >
           <MessageHeader conversationId={conversationId} userId={userId} />
-          <div style={{ height: "80%" }}>
+          <div
+           style={{ height: "80%" }}
+          >
             <Spacer y={1} />
-            <MessageContent />
+            <MessageContent conversationId={conversationId} userId={userId} />
           </div>
-          <MessageInput />
+          <MessageInput session={session} conversationId={conversationId} />
         </Container>
       ) : (
         <NoMessage />

@@ -1,10 +1,66 @@
-import React from "react";
+import React, { useState } from "react";
 import { Grid, Input, Loading } from "@nextui-org/react";
 import { styled } from "@nextui-org/react";
+import { Session } from "next-auth";
 
-type Props = {};
+import { api as trpc } from "../../../../utils/api";
 
-const MessageInput = (props: Props) => {
+type Props = {
+  session: Session;
+  conversationId: string;
+};
+
+const MessageInput = ({ session, conversationId }: Props) => {
+  const utils = trpc.useContext();
+
+  const [messageBody, setMessageBody] = useState("");
+
+  // call sendMessage
+  const { data, error, isLoading, mutateAsync } =
+    trpc.message.sendMessage.useMutation({
+      onMutate: () => {
+        utils.message.messages.cancel();
+        const optimisticUpdate = utils.message.messages.getData();
+
+        if (optimisticUpdate) {
+          utils.message.messages.setData({ conversationId }, optimisticUpdate);
+        }
+      },
+      onSettled: () => {
+        utils.message.messages.invalidate();
+      },
+      onError: (error) => {
+        console.log("onError", error.message);
+      },
+    });
+
+  // Handle onSendMessage
+  const onSendMessage = async () => {
+    const { id: userId } = session.user!!;
+
+    try {
+      const data = await mutateAsync({
+        conversationId,
+        senderId: userId,
+        body: messageBody,
+      });
+
+      if (data) {
+        setMessageBody("");
+      }
+    } catch (error: any) {
+      console.log("onSendMessage err", error?.message);
+    }
+  };
+
+  // subscribe message sent
+  trpc.message.messageSent.useSubscription(undefined, {
+    onData: (data) => {
+      console.log("onData", data);
+      utils.message.messages.invalidate();
+    },
+  });
+
   return (
     <Grid.Container gap={4}>
       <Grid style={{ width: "100%" }}>
@@ -16,8 +72,10 @@ const MessageInput = (props: Props) => {
           clearable
           contentRightStyling={false}
           placeholder="Type your message..."
+          value={messageBody}
+          onChange={(e) => setMessageBody(e.target.value)}
           contentRight={
-            <SendButton>
+            <SendButton onClick={onSendMessage}>
               <SendIcon />
             </SendButton>
           }

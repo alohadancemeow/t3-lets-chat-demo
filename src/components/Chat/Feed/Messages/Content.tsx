@@ -2,21 +2,48 @@ import React from "react";
 import { Container } from "@nextui-org/react";
 import MessageItem from "./Item";
 
-type Props = {};
+import { api as trpc } from "../../../../utils/api";
 
-const Content = (props: Props) => {
+type Props = {
+  userId: string;
+  conversationId: string;
+};
+
+const Content = ({ conversationId, userId }: Props) => {
+  // get messages
+  const { data, error, isLoading } = trpc.message.messages.useQuery({
+    conversationId,
+  });
+
+  console.log("message data", data);
+
   return (
     <Container
       css={{
         // border: "1px solid yellow",
-        height: "100%",
+        // height: "750px",
+        // margin: '10px 0'
+        overflow: 'hidden',
+        overflowY: 'scroll',
+        
+        // scrollBehavior: 'smooth'
       }}
     >
-      {Array(10)
-        .fill("hello, how are you today ?")
-        .map((item, index) => (
-          <MessageItem key={index} message={item} />
-        ))}
+      {isLoading && <>Loading messages...</>}
+
+      {data && data.length !== 0 ? (
+        <>
+          {data.map((message) => (
+            <MessageItem
+              key={message.id}
+              message={message}
+              sentByMe={message.sender.id === userId}
+            />
+          ))}
+        </>
+      ) : (
+        <>No messages</>
+      )}
     </Container>
   );
 };

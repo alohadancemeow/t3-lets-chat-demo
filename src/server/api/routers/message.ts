@@ -9,7 +9,6 @@ import {
   messagePopulated,
 } from "../../../types/myTypes";
 import { TRPCError } from "@trpc/server";
-import { Message, Prisma } from "@prisma/client";
 
 // create a global event emitter
 const ee = new EventEmitter();
@@ -21,7 +20,7 @@ export const messageRouter = createTRPCRouter({
         conversationId: z.string(),
       })
     )
-    .query(async ({ ctx, input }) => {
+    .query(async ({ ctx, input }): Promise<Array<MessagePopulated>> => {
       const { prisma, session } = ctx;
       const { conversationId } = input;
       const { id: userId } = session.user;
@@ -55,9 +54,9 @@ export const messageRouter = createTRPCRouter({
             conversationId,
           },
           include: messagePopulated,
-          orderBy: {
-            createdAt: "desc",
-          },
+          // orderBy: {
+          //   createdAt: "desc",
+          // },
         });
 
         return messages;
@@ -69,7 +68,7 @@ export const messageRouter = createTRPCRouter({
   sendMessage: protectedProcedure
     .input(
       z.object({
-        id: z.string(),
+        // id: z.string(),
         conversationId: z.string(),
         senderId: z.string(),
         body: z.string(),
@@ -78,7 +77,7 @@ export const messageRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }): Promise<boolean> => {
       const { prisma, session } = ctx;
       const {
-        id: messageId,
+        // id: messageId,
         conversationId,
         senderId,
         body: messageBody,
@@ -97,13 +96,16 @@ export const messageRouter = createTRPCRouter({
         //  create new message
         const newMessage = await prisma.message.create({
           data: {
-            id: messageId,
+            // id: messageId,
             senderId,
             conversationId,
             body: messageBody || "...",
           },
           include: messagePopulated,
         });
+
+        console.log('newMessage', newMessage);
+        
 
         // Find conversatio participant
         const participant = await prisma.conversationParticipant.findFirst({

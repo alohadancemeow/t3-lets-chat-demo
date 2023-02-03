@@ -45,6 +45,7 @@ export const messagePopulated = Prisma.validator<Prisma.MessageInclude>()({
     select: {
       id: true,
       username: true,
+      image: true,
     },
   },
 });

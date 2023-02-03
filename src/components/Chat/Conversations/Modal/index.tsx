@@ -99,6 +99,7 @@ const ConversationModal = ({ session, bindings, setVisible }: Props) => {
             placeholder="Paimon"
             aria-label="Close"
             required
+            clearable
             bordered
             color="primary"
             value={username}

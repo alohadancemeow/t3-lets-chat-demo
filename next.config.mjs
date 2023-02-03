@@ -3,7 +3,7 @@
  * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation.
  * This is especially useful for Docker builds.
  */
-!process.env.SKIP_ENV_VALIDATION && (await import("./src/env/server.mjs"));
+// !process.env.SKIP_ENV_VALIDATION && (await import("./src/env/server.mjs"));
 
 /** @type {import("next").NextConfig} */
 const config = {
@@ -16,6 +16,23 @@ const config = {
   },
   images: {
     domains: ['lh3.googleusercontent.com']
-  }
+  },
+  // experimental: {
+  //   appDir: true
+  // },
+  // webpack: (config) => {
+  //   config.experiments = config.experiments || {}
+  //   config.experiments.topLevelAwait = true
+  //   return config
+  // }
 };
 export default config;
+
+// module.exports = {
+//   experimental: { appDir: true },
+//   webpack(config) {
+//     config.experiments = { ...config.experiments, topLevelAwait: true }
+//     return config
+//   },
+//   config
+// }
