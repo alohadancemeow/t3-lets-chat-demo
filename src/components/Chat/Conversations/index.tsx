@@ -20,7 +20,7 @@ const CovnersationWrapper = ({ session }: Props) => {
     error,
     isLoading,
   } = trpc.conversation.conversations.useQuery();
-  // console.log("conversation data", conversationData);
+  console.log("conversation data", conversationData);
 
   // Call markConversatioAsRead mutation
   const { mutateAsync: markConversationAsReadMutate } =

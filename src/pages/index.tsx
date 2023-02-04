@@ -7,7 +7,7 @@ import { Container } from "@nextui-org/react";
 
 const Home: NextPage = () => {
   const { data: session, status } = useSession();
-  console.log("HERE IS SESSION", session);
+  // console.log("HERE IS SESSION", session);
 
   /**
    * Reload session to obtain new username

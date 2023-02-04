@@ -17,7 +17,7 @@ const Content = ({ conversationId, userId }: Props) => {
     conversationId,
   });
 
-  console.log("message data", data);
+  // console.log("message data", data);
 
   return (
     <Container

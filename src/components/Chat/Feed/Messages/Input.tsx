@@ -63,20 +63,13 @@ const MessageInput = ({ session, conversationId }: Props) => {
     },
   });
 
-  // subscribe conversation update
-  // trpc.conversation.conversationUpdated.useSubscription(undefined, {
-  //   onData: () => {
-  //     utils.conversation.conversations.invalidate();
-  //   },
-  // });
-
   return (
     <Grid.Container gap={4}>
       <Grid style={{ width: "100%" }}>
         <Input
           aria-label="Close"
           width="100%"
-          css={{ mb: "10px" }}
+          // css={{ mb: "10px" }}
           size="lg"
           clearable
           contentRightStyling={false}

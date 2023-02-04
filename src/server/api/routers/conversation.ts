@@ -33,8 +33,8 @@ export const conversationRouter = createTRPCRouter({
         },
         include: conversationPopulated,
         orderBy: {
-          updatedAt: 'desc'
-        }
+          updatedAt: "desc",
+        },
       });
 
       // Since above query does not work
@@ -134,7 +134,102 @@ export const conversationRouter = createTRPCRouter({
       }
     }),
 
-  // deleteConversation
+  // updateConversation
+  updateConversation: protectedProcedure
+    .input(
+      z.object({
+        conversationId: z.string(),
+        participantIds: z.array(z.string()),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { prisma, session } = ctx;
+      const { conversationId, participantIds } = input;
+
+      const { id: userId } = session.user;
+
+      try {
+        // get participant in conversation
+        const participants = await prisma.conversationParticipant.findMany({
+          where: {
+            conversationId,
+          },
+        });
+
+        // get participant ids
+        const existingParticipants = participants.map((p) => p.userId);
+
+        // get participant to delete
+        const participantToDelete = existingParticipants.filter(
+          (id) => !participantIds.includes(id)
+        );
+
+        // get participant to create
+        const participantToCreate = participantIds.filter(
+          (id) => !existingParticipants.includes(id)
+        );
+
+        // transection statements
+        const transectionStatements = [
+          prisma.conversation.update({
+            where: {
+              id: conversationId,
+            },
+            data: {
+              participants: {
+                deleteMany: {
+                  userId: {
+                    in: participantToDelete,
+                  },
+                  conversationId,
+                },
+              },
+            },
+            include: conversationPopulated,
+          }),
+        ];
+
+        // conversation to re-create
+        const conversationUpdate = prisma.conversation.update({
+          where: {
+            id: conversationId,
+          },
+          data: {
+            participants: {
+              createMany: {
+                data: participantToCreate.map((userId) => ({
+                  userId,
+                  hasSeenLatestMessage: true,
+                })),
+              },
+            },
+          },
+          include: conversationPopulated,
+        });
+
+        /** Check if users in conversation,
+         *  update conversation
+         */
+        if (participantToCreate.length) {
+          transectionStatements.push(conversationUpdate);
+        }
+
+        // execute transection statements
+        const [update, createOrDelete] = await prisma.$transaction(
+          transectionStatements
+        );
+
+        // subscribe
+        ee.emit("conversationUpdated", [update, createOrDelete]);
+        // ee.emit("conversationUpdated", createOrDelete);
+      } catch (error: any) {
+        console.log("deleteConversatio err", error);
+        throw new TRPCError(error?.message);
+      }
+
+      return true;
+    }),
+
   // Subscriptions when conversation is created
   conversationCreated: publicProcedure.subscription(() => {
     return observable<ConversationPopulated>((emit) => {
