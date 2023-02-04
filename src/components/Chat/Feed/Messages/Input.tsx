@@ -69,6 +69,7 @@ const MessageInput = ({ session, conversationId }: Props) => {
         <Input
           aria-label="Close"
           width="100%"
+          status="primary"
           // css={{ mb: "10px" }}
           size="lg"
           clearable

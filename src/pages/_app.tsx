@@ -1,19 +1,16 @@
 import { type AppType } from "next/app";
 import { type Session } from "next-auth";
 import { SessionProvider, getSession } from "next-auth/react";
-import {
-  NextUIProvider,
-  createTheme,
-  globalCss,
-  gray,
-} from "@nextui-org/react";
+import { NextUIProvider, createTheme, globalCss } from "@nextui-org/react";
 
 import { api } from "../utils/api";
+
+import "../styles/scrollbar.css";
 
 const globalStyles = globalCss({
   body: {
     margin: 0,
-    background: "$gray200",
+    background: "$accents1",
     overflow: "auto",
   },
 });

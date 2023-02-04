@@ -89,7 +89,7 @@ const Header = ({ conversationId, userId }: Props) => {
 
   return (
     <Grid.Container gap={2} alignItems="baseline">
-      <Grid xs={9} alignItems="baseline">
+      <Grid xs={6} sm={9} alignItems="baseline">
         <Grid>
           <Badge isSquared color="primary" variant="bordered">
             To :
@@ -99,7 +99,7 @@ const Header = ({ conversationId, userId }: Props) => {
           <Text h6>{usernames}</Text>
         </Grid>
       </Grid>
-      <Grid xs>
+      <Grid xs justify="flex-end">
         <Popover isOpen={isOpen}>
           <Popover.Trigger>
             <Button color="error" auto flat onPress={() => setIsOpen(true)}>
@@ -148,7 +148,7 @@ export const LeaveDialog: React.FC<{
       <Grid.Container justify="space-between" alignContent="center">
         <Grid>
           <Button size="sm" light onPress={() => setIsOpen(false)}>
-            ehe te nandayo?
+            Just kidding
           </Button>
         </Grid>
         <Grid>

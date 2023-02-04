@@ -76,6 +76,7 @@ const Auth = ({ session, reloadSession }: Props) => {
       alignContent="center"
       css={{
         height: "100vh",
+        // bg: '$accents1'
         // border: "1px solid red",
       }}
     >
@@ -125,7 +126,7 @@ const Auth = ({ session, reloadSession }: Props) => {
           </Card.Body>
         </Card>
       ) : (
-        <Card css={{ width: "350px", padding: "20px" }}>
+        <Card css={{ width: "350px", padding: "20px", bg: "$accents1" }}>
           <Card.Body>
             <Row justify="center" align="center">
               <Text h2 size={18} color="white" css={{ m: 0 }}>

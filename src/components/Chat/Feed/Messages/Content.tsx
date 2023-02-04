@@ -25,22 +25,21 @@ const Content = ({ conversationId, userId }: Props) => {
         // border: "1px solid yellow",
         height: "750px",
         overflowY: "auto",
+        // bg: "$accents2",
       }}
     >
       {isLoading && <>Loading messages...</>}
 
       {data && data.length !== 0 ? (
-        <>
-          <ScrollableFeed>
-            {data.map((message) => (
-              <MessageItem
-                key={message.id}
-                message={message}
-                sentByMe={message.sender.id === userId}
-              />
-            ))}
-          </ScrollableFeed>
-        </>
+        <ScrollableFeed>
+          {data.map((message) => (
+            <MessageItem
+              key={message.id}
+              message={message}
+              sentByMe={message.sender.id === userId}
+            />
+          ))}
+        </ScrollableFeed>
       ) : (
         <NoMessage />
       )}

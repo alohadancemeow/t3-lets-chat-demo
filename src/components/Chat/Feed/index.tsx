@@ -41,7 +41,7 @@ const FeedWrapper = ({ session }: Props) => {
         >
           <MessageHeader conversationId={conversationId} userId={userId} />
           <div style={{ height: "80%" }}>
-            <Spacer y={1} />
+            {/* <Spacer y={1} /> */}
             <MessageContent conversationId={conversationId} userId={userId} />
           </div>
           <MessageInput session={session} conversationId={conversationId} />

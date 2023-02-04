@@ -31,7 +31,7 @@ const Item = ({ message, sentByMe }: Props) => {
     <Container
       display="flex"
       justify={sentByMe ? "flex-end" : "flex-start"}
-      css={{ padding: "0px", margin: "10px 0" }}
+      css={{ padding: "0 14px 0 0", margin: "10px 0" }}
       // gap={5}
     >
       <div>
